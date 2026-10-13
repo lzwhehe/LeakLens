@@ -244,7 +244,7 @@ async def test_report(notifier: NotifierV2):
 async def interactive_setup():
     """交互式配置向导"""
     console.print(Panel.fit(
-        "[bold cyan]GitHub Secret Scanner Pro - 通知系统配置向导[/bold cyan]\n\n"
+        "[bold cyan]LeakLens - 通知系统配置向导[/bold cyan]\n\n"
         "此向导将帮助你配置通知渠道",
         title="欢迎"
     ))

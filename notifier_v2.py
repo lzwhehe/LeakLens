@@ -173,7 +173,7 @@ class DiscordChannel(NotificationChannel):
                 {"name": "Key", "value": f"`{key_info.masked_key}`", "inline": False},
             ],
             "timestamp": key_info.found_time.isoformat(),
-            "footer": {"text": "GitHub Secret Scanner Pro"}
+            "footer": {"text": "LeakLens"}
         }
 
         # 可选字段
@@ -214,7 +214,7 @@ class DiscordChannel(NotificationChannel):
             "description": content[:4096],  # Discord 限制
             "color": Severity.INFO.color,
             "timestamp": datetime.now().isoformat(),
-            "footer": {"text": "GitHub Secret Scanner Pro - Daily Report"}
+            "footer": {"text": "LeakLens - Daily Report"}
         }
 
         try:
@@ -287,7 +287,7 @@ class SlackChannel(NotificationChannel):
         blocks.append({"type": "divider"})
         blocks.append({
             "type": "context",
-            "elements": [{"type": "mrkdwn", "text": f"GitHub Secret Scanner Pro | {key_info.found_time.strftime('%Y-%m-%d %H:%M:%S')}"}]
+            "elements": [{"type": "mrkdwn", "text": f"LeakLens | {key_info.found_time.strftime('%Y-%m-%d %H:%M:%S')}"}]
         })
 
         payload = {"blocks": blocks}
@@ -366,7 +366,7 @@ class TelegramChannel(NotificationChannel):
         if key_info.source_url:
             text += f"\n\n[查看来源]({key_info.source_url})"
 
-        text += f"\n\n_GitHub Secret Scanner Pro_"
+        text += f"\n\n_LeakLens_"
 
         url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
         payload = {
@@ -463,7 +463,7 @@ class FeishuChannel(NotificationChannel):
         card["card"]["elements"].append({"tag": "hr"})
         card["card"]["elements"].append({
             "tag": "note",
-            "elements": [{"tag": "plain_text", "content": f"GitHub Secret Scanner Pro | {key_info.found_time.strftime('%Y-%m-%d %H:%M:%S')}"}]
+            "elements": [{"tag": "plain_text", "content": f"LeakLens | {key_info.found_time.strftime('%Y-%m-%d %H:%M:%S')}"}]
         })
 
         try:
@@ -549,7 +549,7 @@ class DingtalkChannel(NotificationChannel):
         if key_info.source_url:
             text += f"\n\n[查看来源]({key_info.source_url})"
 
-        text += f"\n\n---\n*GitHub Secret Scanner Pro | {key_info.found_time.strftime('%H:%M:%S')}*"
+        text += f"\n\n---\n*LeakLens | {key_info.found_time.strftime('%H:%M:%S')}*"
 
         payload = {
             "msgtype": "markdown",

@@ -164,7 +164,7 @@ class Dashboard:
         
         return Panel(
             header_text,
-            title="🔍 GitHub Secret Scanner Pro",
+            title="🔍 LeakLens",
             title_align="center",
             border_style="cyan",
             box=box.ROUNDED,

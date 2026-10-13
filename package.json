@@ -1,0 +1,10 @@
+{
+  "name": "leaklens",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "web": "python3 app.py",
+    "export:vercel": "python3 scripts/export_vercel_data.py",
+    "vercel-build": "echo 'LeakLens static dashboard: no build step required'"
+  }
+}

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LeakLens</title>
+    <link rel="stylesheet" href="/static/app.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <div class="brand">LeakLens</div>
+        <div class="subtitle">GitHub secret scanner control panel</div>
+      </div>
+      <div class="top-actions">
+        <span id="dbState" class="state-pill">Loading</span>
+        <span id="scanState" class="state-pill">Scanner idle</span>
+        <a id="exportLink" class="icon-button" href="/api/export.csv" title="Export filtered CSV">CSV</a>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="metrics-grid" aria-label="Summary">
+        <article class="metric">
+          <span class="metric-label">Total Keys</span>
+          <strong id="metricTotal">0</strong>
+        </article>
+        <article class="metric">
+          <span class="metric-label">Valid</span>
+          <strong id="metricValid">0</strong>
+        </article>
+        <article class="metric">
+          <span class="metric-label">High Value</span>
+          <strong id="metricHigh">0</strong>
+        </article>
+        <article class="metric">
+          <span class="metric-label">Scanned Blobs</span>
+          <strong id="metricBlobs">0</strong>
+        </article>
+      </section>
+
+      <section class="scan-section" aria-label="Scanner Controls">
+        <div class="panel-head">
+          <h2>Scanner</h2>
+          <span id="scanMeta">Idle</span>
+        </div>
+        <form id="scanForm" class="control-grid">
+          <div class="field token-field">
+            <label for="githubTokens">GitHub Tokens</label>
+            <textarea id="githubTokens" autocomplete="off" spellcheck="false" placeholder="ghp_xxx, ghp_yyy"></textarea>
+          </div>
+          <div class="field">
+            <label for="scanMode">Version</label>
+            <select id="scanMode">
+              <option value="classic">Stable Engine</option>
+              <option value="v2.2">v2.2 Smart Cache</option>
+              <option value="v2.1">v2.1 Optimized</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dbPath">Database</label>
+            <input id="dbPath" type="text" value="leaked_keys.db" />
+          </div>
+          <div class="field">
+            <label for="proxyUrl">Proxy</label>
+            <input id="proxyUrl" type="text" placeholder="http://127.0.0.1:7890" />
+          </div>
+          <div class="field">
+            <label for="pastebinKey">Pastebin Key</label>
+            <input id="pastebinKey" type="password" autocomplete="off" />
+          </div>
+          <fieldset class="source-box">
+            <legend>Sources</legend>
+            <label><input id="sourceGist" type="checkbox" /> Gist</label>
+            <label><input id="sourceGitlab" type="checkbox" /> GitLab</label>
+            <label><input id="sourcePastebin" type="checkbox" /> Pastebin</label>
+            <label><input id="sourceSearchcode" type="checkbox" /> SearchCode</label>
+            <label><input id="sourceRealtime" type="checkbox" /> Realtime</label>
+            <label><input id="sourceAll" type="checkbox" /> All</label>
+            <label><input id="noCache" type="checkbox" /> No Cache</label>
+          </fieldset>
+          <div class="scan-actions">
+            <button id="startScan" class="primary-button" type="submit">Start</button>
+            <button id="stopScan" class="danger-button" type="button">Stop</button>
+          </div>
+        </form>
+        <pre id="scanLogs" class="log-console">Waiting for scanner...</pre>
+      </section>
+
+      <section class="visual-grid" aria-label="Charts">
+        <div class="chart-panel">
+          <div class="panel-head">
+            <h2>Status</h2>
+            <span id="generatedAt"></span>
+          </div>
+          <canvas id="statusChart" height="240"></canvas>
+          <div id="statusLegend" class="legend"></div>
+        </div>
+        <div class="chart-panel">
+          <div class="panel-head">
+            <h2>Platforms</h2>
+            <span id="progressText"></span>
+          </div>
+          <canvas id="platformChart" height="240"></canvas>
+          <div class="progress-track"><span id="progressBar"></span></div>
+        </div>
+      </section>
+
+      <section class="table-section">
+        <div class="toolbar">
+          <div class="field">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+              <option value="">All</option>
+              <option value="valid">Valid</option>
+              <option value="quota_exceeded">Quota</option>
+              <option value="pending">Pending</option>
+              <option value="invalid">Invalid</option>
+              <option value="connection_error">Connection</option>
+              <option value="unverified">Unverified</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="platformFilter">Platform</label>
+            <select id="platformFilter">
+              <option value="">All</option>
+            </select>
+          </div>
+          <div class="field search-field">
+            <label for="searchBox">Search</label>
+            <input id="searchBox" type="search" autocomplete="off" placeholder="base url, source, model" />
+          </div>
+          <button id="refreshButton" class="icon-button" type="button" title="Refresh">Refresh</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Status</th>
+                <th>Key</th>
+                <th>Model</th>
+                <th>RPM</th>
+                <th>Source</th>
+                <th>Found</th>
+              </tr>
+            </thead>
+            <tbody id="keysTable">
+              <tr><td colspan="7" class="empty">Loading</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 
 ## 概述
 
-通知系统 v2.0 是 GitHub Secret Scanner Pro 的增强版通知模块，支持 **10+ 通知渠道** 和 **智能分级通知**。
+通知系统 v2.0 是 LeakLens 的增强版通知模块，支持 **10+ 通知渠道** 和 **智能分级通知**。
 
 ## 新增功能
 
@@ -207,7 +207,7 @@ Key: sk-proj-****abcd
 余额: $50.00
 来源: GitHub Link
 ━━━━━━━━━━━━━━━━━━━━━━━
-GitHub Secret Scanner Pro
+LeakLens
 ```
 
 ### Telegram
@@ -223,7 +223,7 @@ Key: sk-proj-****abcd
 
 查看来源
 
-GitHub Secret Scanner Pro
+LeakLens
 ```
 
 ## 故障排除

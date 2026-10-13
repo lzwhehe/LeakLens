@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Secret Scanner Pro - v2.1 优化版主程序
+LeakLens - v2.1 优化版主程序
 
 v2.1 新特性：
 1. 连接池管理 - 复用 HTTP 连接
@@ -79,7 +79,8 @@ class OptimizedSecretScannerV21:
     def __init__(self, enable_pastebin: bool = False, enable_gist: bool = False,
                  enable_searchcode: bool = False, enable_gitlab: bool = False,
                  enable_realtime: bool = False, pastebin_api_key: str = "",
-                 enable_performance_monitor: bool = True):
+                 enable_performance_monitor: bool = True,
+                 headless: bool = False):
         self.stop_event = threading.Event()
 
         # 使用动态队列（v2.1 新增）
@@ -97,6 +98,7 @@ class OptimizedSecretScannerV21:
         # v2.1 性能监控
         self.performance_monitor = None
         self.enable_performance_monitor = enable_performance_monitor
+        self.headless = headless
 
         self.scanner_thread = None
         self.validator_threads = []
@@ -131,7 +133,7 @@ class OptimizedSecretScannerV21:
 
         # 初始化连接池（v2.1）
         pool = await get_connection_pool()
-        logger.info(f"连接池初始化完成 (最大连接: {pool.config.max_connections})")
+        logger.info(f"连接池初始化完成 (最大连接: {pool.max_connections})")
 
         # 初始化性能监控（v2.1）
         if self.enable_performance_monitor:
@@ -163,7 +165,7 @@ class OptimizedSecretScannerV21:
 
         logger.info("配置验证通过")
         logger.info("=" * 60)
-        logger.info("GitHub Secret Scanner Pro v2.1")
+        logger.info("LeakLens v2.1")
         logger.info("=" * 60)
 
         # 尝试启用 uvloop
@@ -241,35 +243,42 @@ class OptimizedSecretScannerV21:
             )
             self.dashboard.add_log("[Realtime] 实时监控已启用", "INFO")
 
-        # 启动 TUI
-        with self.dashboard.start():
+        if self.headless:
             try:
                 while not self.stop_event.is_set():
-                    # 更新队列大小
-                    if self.use_dynamic_queue:
-                        queue_size = self.result_queue.qsize()
-                    else:
-                        queue_size = self.result_queue.qsize()
-
-                    self.dashboard.update_stats(queue_size=queue_size)
-
-                    # 更新性能监控统计（v2.1）
-                    if self.performance_monitor:
-                        stats = self.performance_monitor.get_validation_stats()
-                        if stats['total'] > 0:
-                            self.dashboard.add_log(
-                                f"[Monitor] 验证: {stats['total']} | "
-                                f"成功率: {stats['success_rate']:.1f}% | "
-                                f"延迟P95: {stats['latency']['p95_ms']:.1f}ms",
-                                "INFO"
-                            )
-
-                    self.dashboard.refresh()
-                    time.sleep(0.25)
+                    self._update_runtime_stats()
+                    time.sleep(1.0)
             except KeyboardInterrupt:
                 pass
             finally:
                 self.stop()
+        else:
+            # 启动 TUI
+            with self.dashboard.start():
+                try:
+                    while not self.stop_event.is_set():
+                        self._update_runtime_stats()
+                        self.dashboard.refresh()
+                        time.sleep(0.25)
+                except KeyboardInterrupt:
+                    pass
+                finally:
+                    self.stop()
+
+    def _update_runtime_stats(self):
+        """更新队列和性能监控统计。"""
+        queue_size = self.result_queue.qsize() if self.result_queue else 0
+        self.dashboard.update_stats(queue_size=queue_size)
+
+        if self.performance_monitor:
+            stats = self.performance_monitor.get_validation_stats()
+            if stats['total'] > 0:
+                self.dashboard.add_log(
+                    f"[Monitor] 验证: {stats['total']} | "
+                    f"成功率: {stats['success_rate']:.1f}% | "
+                    f"延迟P95: {stats['latency']['p95_ms']:.1f}ms",
+                    "INFO"
+                )
 
     def stop(self):
         """停止系统"""
@@ -356,7 +365,7 @@ def export_keys(db_path: str, output_file: str, status_filter: str = None):
         return
 
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(f"# GitHub Secret Scanner 导出结果\n")
+        f.write(f"# LeakLens 导出结果\n")
         f.write(f"# 时间: {datetime.now().isoformat()}\n")
         f.write(f"# 数量: {len(keys)}\n")
         f.write("=" * 60 + "\n\n")
@@ -460,7 +469,7 @@ def show_stats(db_path: str):
 def main():
     """主函数"""
     parser = argparse.ArgumentParser(
-        description="GitHub Secret Scanner Pro v2.1 - 优化版",
+        description="LeakLens v2.1 - 优化版",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 v2.1 新特性:
@@ -481,6 +490,7 @@ v2.1 新特性:
     # v2.1 优化选项
     parser.add_argument('--no-monitor', action='store_true', help='禁用性能监控')
     parser.add_argument('--no-dynamic-queue', action='store_true', help='禁用动态队列')
+    parser.add_argument('--headless', action='store_true', help='无 TUI 模式，适合 Web 后台运行')
 
     # 扫描源选项
     parser.add_argument('--pastebin', action='store_true', help='启用 Pastebin 扫描源')
@@ -525,7 +535,8 @@ v2.1 新特性:
         enable_gitlab=enable_gitlab,
         enable_realtime=enable_realtime,
         pastebin_api_key=args.pastebin_key,
-        enable_performance_monitor=not args.no_monitor
+        enable_performance_monitor=not args.no_monitor,
+        headless=args.headless
     )
 
     # 应用动态队列设置

@@ -1361,6 +1361,45 @@ def get_scan_result_class():
     return ScanResult
 
 
+async def validate_key_async(
+    platform: str,
+    api_key: str,
+    base_url: str,
+    circuit_breaker: CircuitBreaker = None,
+) -> tuple[KeyStatus, str, str, int, bool]:
+    """
+    Backward-compatible async validation helper used by older adapters.
+
+    Newer code validates through AsyncValidator.validate_single(), while
+    validator_async.py from the v2.x path still imports this top-level helper.
+    """
+    ScanResult = get_scan_result_class()
+    result = ScanResult(
+        platform=platform,
+        api_key=api_key,
+        base_url=base_url,
+        source_url="",
+        is_azure=platform.lower() == "azure",
+    )
+    validator = AsyncValidator(db=None)
+    if circuit_breaker is not None:
+        validator._circuit_breaker = circuit_breaker
+    try:
+        validation = await validator.validate_single(result)
+        balance = validation.info
+        if validation.balance_usd > 0:
+            balance = f"${validation.balance_usd:.2f} | {balance}"
+        return (
+            validation.status,
+            balance,
+            validation.model_tier,
+            validation.rpm,
+            validation.is_high_value,
+        )
+    finally:
+        await validator.close()
+
+
 async def run_validator_loop(
     result_queue: 'asyncio.Queue',
     db: Database,
@@ -1505,12 +1544,13 @@ def start_validators(
 try:
     from validator_optimized import OptimizedAsyncValidator
     __all__ = ['AsyncValidator', 'OptimizedAsyncValidator', 'start_validators',
+               'validate_key_async',
                'ValidationResult', 'CircuitBreaker', 'circuit_breaker', 'mask_key',
                'MAX_CONCURRENCY', 'REQUEST_TIMEOUT', 'HIGH_VALUE_MODELS',
                'RPM_ENTERPRISE_THRESHOLD', 'RPM_FREE_TRIAL_THRESHOLD']
 except ImportError:
     # 如果优化模块不可用，只导出原版
-    __all__ = ['AsyncValidator', 'start_validators', 'ValidationResult',
+    __all__ = ['AsyncValidator', 'start_validators', 'validate_key_async', 'ValidationResult',
                'CircuitBreaker', 'circuit_breaker', 'mask_key',
                'MAX_CONCURRENCY', 'REQUEST_TIMEOUT', 'HIGH_VALUE_MODELS',
                'RPM_ENTERPRISE_THRESHOLD', 'RPM_FREE_TRIAL_THRESHOLD']

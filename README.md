@@ -1,4 +1,4 @@
-# GitHub Secret Scanner Pro
+# LeakLens
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -6,9 +6,9 @@
 ![Version](https://img.shields.io/badge/version-v2.2--smart--cache-orange.svg)
 ![Performance](https://img.shields.io/badge/performance-100x+-brightgreen.svg)
 
-🚀 **企业级 GitHub 密钥扫描与验证系统 - v2.2 智能缓存版**
+🚀 **企业级 GitHub 密钥扫描、验证与可视化系统 - v2.2 智能缓存版**
 
-GitHub Secret Scanner Pro 是一款高性能的自动化工具，专为安全研究人员和红队设计。它利用 GitHub API 实时扫描代码库中的敏感密钥，并使用高并发异步架构进行深度有效性验证。
+LeakLens 是一款高性能的自动化工具，专为安全研究人员和红队设计。它利用 GitHub API 实时扫描代码库中的敏感密钥，使用高并发异步架构进行深度有效性验证，并提供 Web 可视化面板查看结果、状态分布和平台分布。
 
 **v2.2 智能缓存版**在 v2.1 基础上引入智能缓存系统和批量验证优化，实现 **30-50%** 的额外性能提升。
 
@@ -100,14 +100,21 @@ GitHub Secret Scanner Pro 是一款高性能的自动化工具，专为安全研
 - **Token 池轮询** - 突破 GitHub API 限制
 - **断点续传** - SQLite 持久化存储
 
+### 🖥️ Web 可视化
+- **实时总览** - 总 Key、有效 Key、高价值 Key、已扫描 Blob 一屏查看
+- **图表分析** - 状态环图、平台柱状图、扫描进度条自动刷新
+- **结果检索** - 按状态、平台、来源、模型和 URL 过滤
+- **安全展示** - Web 表格默认只显示脱敏 Key，避免二次泄露
+- **零额外依赖** - 基于 Python 标准库读取现有 SQLite 数据库
+
 ## 🚀 快速开始
 
 ### 方式 1: 使用 v2.2 智能缓存版 (推荐)
 
 ```bash
 # 克隆仓库
-git clone https://github.com/Coff0xc/Github-API-scan.git
-cd Github-API-scan
+git clone https://github.com/Coff0xc/Github-API-scan.git LeakLens
+cd LeakLens
 
 # 安装依赖
 pip install -r requirements.txt
@@ -122,6 +129,40 @@ python main_v2.2.py
 # 禁用缓存（回退到 v2.1 行为）
 python main_v2.2.py --no-cache
 ```
+
+### Web 可视化面板
+
+```bash
+# 使用默认数据库 leaked_keys.db
+python app.py
+
+# 或使用 npm script
+npm run web
+
+# 指定数据库和端口
+python app.py --db leaked_keys.db --port 8787
+```
+
+打开 http://127.0.0.1:8787 使用 LeakLens Web 控制台。你可以在页面里填写 GitHub Token、选择扫描版本和扫描源、启动/停止扫描、查看实时日志，并继续使用图表和结果表分析数据库。
+
+### 部署到 Vercel
+
+Vercel 适合展示导出的扫描结果，不适合运行完整扫描逻辑。扫描器是长时间运行任务，需要本机或 VPS 上的常驻 Python 进程；Vercel Serverless Function 有执行时长和无状态限制，无法稳定承担实时扫描。
+
+Vercel 展示版使用 `public/` 静态前端和 `api/` Serverless API。由于 Vercel 无法直接读取你本机持续更新的 SQLite 文件，部署前可先把本地数据库导出为 JSON：
+
+```bash
+# 将 leaked_keys.db 导出为 Vercel 可读取的数据文件
+npm run export:vercel
+
+# 预览部署
+vercel --yes
+
+# 生产部署
+vercel --prod --yes
+```
+
+如果还没有生成 `leaked_keys.db`，线上面板会正常显示空状态；之后重新导出并部署即可更新线上数据。
 
 ### 方式 2: 使用 v2.1 优化版
 
@@ -218,6 +259,12 @@ python main.py --stats
 ├── main.py                    # 原版主程序
 ├── main_v2.1.py               # v2.1 优化版主程序
 ├── main_v2.2.py               # v2.2 智能缓存版主程序 (推荐)
+├── web_dashboard.py           # LeakLens Web 可视化面板
+├── web/                       # Web 前端静态资源
+├── public/                    # Vercel 静态前端
+├── api/                       # Vercel Serverless API
+├── data/leaklens-results.json # Vercel 展示数据
+├── scripts/export_vercel_data.py # SQLite 转 Vercel JSON
 ├── scanner.py                 # GitHub 扫描器
 ├── scanner_async.py           # 异步扫描器适配器
 ├── validator.py               # Key 验证器

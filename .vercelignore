@@ -1,0 +1,16 @@
+# Vercel only needs the dashboard shell, serverless API, and exported data.
+# The scanner Python files are CLI/TUI tools and should not be detected as
+# Python Serverless Functions during deployment.
+*.py
+*.md
+*.yaml
+*.yml
+*.txt
+assets/
+web/
+__pycache__/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3

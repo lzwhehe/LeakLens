@@ -143,7 +143,7 @@ def compare_results(sync_result: BenchmarkResult, async_result: BenchmarkResult)
 def main():
     """主函数"""
     print("="*60)
-    print("GitHub Secret Scanner Pro - 性能对比测试")
+    print("LeakLens - 性能对比测试")
     print("="*60)
 
     # 生成测试数据

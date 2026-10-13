@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Secret Scanner Pro - 优化版主程序
+LeakLens - 优化版主程序
 
 优化内容:
 1. 异步数据库 (AsyncDatabase) - 性能提升 3-5倍
@@ -448,7 +448,7 @@ def export_keys(db_path: str, output_file: str, status_filter: str = None):
 
     # 写入文件
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(f"# GitHub Secret Scanner 导出结果\n")
+        f.write(f"# LeakLens 导出结果\n")
         f.write(f"# 时间: {datetime.now().isoformat()}\n")
         f.write(f"# 数量: {len(keys)}\n")
         f.write("=" * 60 + "\n\n")
@@ -554,7 +554,7 @@ def show_stats(db_path: str):
 def main():
     """主函数"""
     parser = argparse.ArgumentParser(
-        description="GitHub Secret Scanner Pro - 优化版",
+        description="LeakLens - 优化版",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 

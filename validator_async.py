@@ -125,7 +125,8 @@ def start_async_validators(
     async_db: AsyncDatabase,
     stop_event,
     dashboard=None,
-    num_workers: int = 2
+    num_workers: int = 2,
+    **_kwargs
 ):
     """
     启动异步验证器
@@ -176,3 +177,22 @@ def start_async_validators(
     thread.start()
 
     return [thread]
+
+
+def start_validators(
+    result_queue: asyncio.Queue,
+    async_db: AsyncDatabase,
+    stop_event,
+    dashboard=None,
+    num_workers: int = 2,
+    **kwargs
+):
+    """Compatibility alias for v2.2 scanner startup."""
+    return start_async_validators(
+        result_queue,
+        async_db,
+        stop_event,
+        dashboard=dashboard,
+        num_workers=num_workers,
+        **kwargs,
+    )

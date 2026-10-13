@@ -1,4 +1,4 @@
-# GitHub Secret Scanner Pro - v2.2 优化报告
+# LeakLens - v2.2 优化报告
 
 ## 概述
 

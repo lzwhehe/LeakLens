@@ -80,7 +80,7 @@ URL: {base_url}
 时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 ---
-GitHub Secret Scanner
+LeakLens
 """
             msg = MIMEText(content, "plain", "utf-8")
             msg["Subject"] = subject

@@ -236,7 +236,7 @@ async def test_integrated_performance():
 async def main():
     """主测试函数"""
     print("=" * 60)
-    print("GitHub Secret Scanner Pro - v2.1 优化测试")
+    print("LeakLens - v2.1 优化测试")
     print("=" * 60)
     print(f"\n开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 

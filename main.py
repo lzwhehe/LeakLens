@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Secret Scanner Pro - 主程序入口
+LeakLens - 主程序入口
 
 ================================================================================
                               ⚠️ 免责声明 ⚠️
@@ -45,11 +45,13 @@ class SecretScanner:
 
     def __init__(self, enable_pastebin: bool = False, enable_gist: bool = False,
                  enable_searchcode: bool = False, enable_gitlab: bool = False,
-                 enable_realtime: bool = False, pastebin_api_key: str = ""):
+                 enable_realtime: bool = False, pastebin_api_key: str = "",
+                 headless: bool = False):
         self.stop_event = threading.Event()
         self.result_queue = queue.Queue(maxsize=1000)
         self.db = Database(config.db_path)
         self.dashboard = Dashboard()
+        self.headless = headless
 
         self.scanner_thread = None
         self.validator_threads = []
@@ -146,17 +148,27 @@ class SecretScanner:
             )
             self.dashboard.add_log("[Realtime] 实时监控已启用", "INFO")
 
-        # 启动 TUI
-        with self.dashboard.start():
+        if self.headless:
             try:
                 while not self.stop_event.is_set():
                     self.dashboard.update_stats(queue_size=self.result_queue.qsize())
-                    self.dashboard.refresh()
-                    time.sleep(0.25)
+                    time.sleep(1.0)
             except KeyboardInterrupt:
                 pass
             finally:
                 self.stop()
+        else:
+            # 启动 TUI
+            with self.dashboard.start():
+                try:
+                    while not self.stop_event.is_set():
+                        self.dashboard.update_stats(queue_size=self.result_queue.qsize())
+                        self.dashboard.refresh()
+                        time.sleep(0.25)
+                except KeyboardInterrupt:
+                    pass
+                finally:
+                    self.stop()
     
     def stop(self):
         """停止系统"""
@@ -213,7 +225,7 @@ def export_keys(db_path: str, output_file: str, status_filter: str = None):
     
     # 写入文件
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(f"# GitHub Secret Scanner 导出结果\n")
+        f.write(f"# LeakLens 导出结果\n")
         f.write(f"# 时间: {datetime.now().isoformat()}\n")
         f.write(f"# 数量: {len(keys)}\n")
         f.write("=" * 60 + "\n\n")
@@ -324,7 +336,7 @@ def show_stats(db_path: str):
 def main():
     """主函数"""
     parser = argparse.ArgumentParser(
-        description="GitHub Secret Scanner Pro",
+        description="LeakLens",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
@@ -334,6 +346,7 @@ def main():
     parser.add_argument('--stats', action='store_true', help='显示统计')
     parser.add_argument('--db', type=str, default='leaked_keys.db', help='数据库路径')
     parser.add_argument('--proxy', type=str, help='代理地址')
+    parser.add_argument('--headless', action='store_true', help='无 TUI 模式，适合 Web 后台运行')
 
     # 扫描源选项
     parser.add_argument('--pastebin', action='store_true', help='启用 Pastebin 扫描源')
@@ -377,7 +390,8 @@ def main():
         enable_searchcode=enable_searchcode,
         enable_gitlab=enable_gitlab,
         enable_realtime=enable_realtime,
-        pastebin_api_key=args.pastebin_key
+        pastebin_api_key=args.pastebin_key,
+        headless=args.headless
     )
     scanner.start()
 

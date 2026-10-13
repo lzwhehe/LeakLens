@@ -1,4 +1,4 @@
-# 快速开始 - GitHub Secret Scanner Pro 优化版
+# 快速开始 - LeakLens 优化版
 
 5 分钟快速上手优化版扫描器。
 

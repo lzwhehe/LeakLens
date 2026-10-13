@@ -1,4 +1,4 @@
-# GitHub Secret Scanner Pro - v2.2 性能优化总结
+# LeakLens - v2.2 性能优化总结
 
 ## 版本信息
 
@@ -605,4 +605,4 @@ v2.2 版本的成功离不开以下技术栈的支持：
 
 **文档版本**: 1.0
 **最后更新**: 2026-01-12
-**作者**: GitHub Secret Scanner Pro Team
+**作者**: LeakLens Team
